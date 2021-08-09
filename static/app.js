@@ -56,13 +56,14 @@ function connect(username) {
     let promise = new Promise((resolve, reject) => {
         // get a token from the back end
         let data;
-        fetch('/login', {
+        fetch('/login/', {
             method: 'POST',
             body: JSON.stringify({'username': username})
         }).then(res => res.json()).then(_data => {
             // join video call
             data = _data;
             return Twilio.Video.connect(data.token);
+            
         }).then(_room => {
             room = _room;
             room.participants.forEach(participantConnected);
@@ -70,6 +71,7 @@ function connect(username) {
             room.on('participantDisconnected', participantDisconnected);
             connected = true;
             updateParticipantCount();
+            console.log(data);
             connectChat(data.token, data.conversation_sid);
             resolve();
         }).catch(e => {
@@ -235,7 +237,7 @@ function addMessageToChat(user, message) {
     chatScroll.scrollTop = chatScroll.scrollHeight;
 }
 
-function toggleChatHandler() {
+function toggleChatHandler(event) {
     event.preventDefault();
     if (root.classList.contains('withChat')) {
         root.classList.remove('withChat');
