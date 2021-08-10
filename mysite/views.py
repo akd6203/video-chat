@@ -15,10 +15,15 @@ def index(request):
     return render(request, 'index.html')
 
 @csrf_exempt
-def signin(request):
+def get_token(request):
+    room_name = 'My Room'
     if request.method=="POST":
-        body_unicode = request.body.decode('utf-8')
-        body = json.loads(body_unicode)
+        try:
+            body_unicode = request.body.decode('utf-8')
+            body = json.loads(body_unicode)
+        except json.decoder.JSONDecodeError as err:
+            return JsonResponse({"status":"Missing required parameter 'username'"})
+  
         username = body.get("username")
         
         if not username:
@@ -26,7 +31,7 @@ def signin(request):
         print("username=",username)
         token = AccessToken(twilio_account_sid, twilio_api_key_sid,
                             twilio_api_key_secret, identity=username)
-        token.add_grant(VideoGrant(room='My Room'))
+        token.add_grant(VideoGrant(room=room_name))
         
-        return JsonResponse({'token': token.to_jwt().decode()})
+        return JsonResponse({'token': token.to_jwt().decode(),'room_name':room_name})
     return HttpResponse("Error")
